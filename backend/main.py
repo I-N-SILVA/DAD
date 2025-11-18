@@ -18,14 +18,21 @@ from loguru import logger
 import asyncio
 
 from backend.core.config import get_config
+from backend.models.database import get_db_manager, get_db_session, Tweet, TweetDraft
+from backend.services.notifications import get_notification_service
 from rag.embeddings.generator import EmbeddingGenerator
 from rag.vectorstore.chroma_store import ChromaStore
 from rag.retrieval.retriever import ContentRetriever
 from rag.indexing.indexer import DocumentIndexer
 from integrations.claude.client import ClaudeClient
 from content.generation.tweet_generator import TweetGenerator
+from content.analysis.performance_analyzer import PerformanceAnalyzer
+from content.analysis.tweet_scorer import TweetScorer
+from content.optimization.smart_queue import SmartPostingQueue
+from content.generation.visual_generator import VisualContentGenerator
 from automation.schedulers.scheduler import TaskScheduler
 from automation.workflows.morning_briefing import run_morning_briefing
+from automation.workflows.competitor_intel import CompetitorIntelligence
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -364,6 +371,289 @@ async def list_scheduled_jobs():
             for job_id, info in jobs.items()
         ]
     }
+
+
+# === NEW ADVANCED FEATURES ===
+
+@app.post("/analyze/tweet-score")
+async def score_tweet(content: str, metadata: Optional[Dict[str, Any]] = None):
+    """Score a tweet before posting."""
+    try:
+        scorer = TweetScorer()
+        score = scorer.score_tweet(content, metadata or {})
+        scorer.close()
+
+        return {
+            "success": True,
+            "score": score,
+            "timestamp": datetime.now().isoformat()
+        }
+
+    except Exception as e:
+        logger.error(f"Error scoring tweet: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/analytics/performance")
+async def get_performance_analytics(days: int = 7):
+    """Get performance analytics and insights."""
+    try:
+        analyzer = PerformanceAnalyzer()
+
+        # Generate report
+        report = analyzer.generate_performance_report(days=days)
+
+        # Get insights
+        insights = analyzer.analyze_top_performers()
+
+        # Get recommendations
+        recommendations = analyzer.get_content_recommendations()
+
+        analyzer.close()
+
+        return {
+            "success": True,
+            "report": report,
+            "insights": [
+                {
+                    "type": i.insight_type,
+                    "title": i.title,
+                    "description": i.description,
+                    "recommendation": i.recommendation,
+                    "confidence": i.confidence
+                }
+                for i in insights
+            ],
+            "recommendations": recommendations
+        }
+
+    except Exception as e:
+        logger.error(f"Error getting analytics: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/queue/auto-schedule")
+async def auto_schedule_queue(
+    tweets: List[str],
+    categories: Optional[List[str]] = None,
+    spacing_hours: int = 4
+):
+    """Automatically schedule tweets with ML optimization."""
+    try:
+        queue = SmartPostingQueue()
+
+        scheduled = queue.auto_schedule_queue(
+            tweets=tweets,
+            categories=categories,
+            spacing_hours=spacing_hours
+        )
+
+        queue.close()
+
+        return {
+            "success": True,
+            "scheduled_count": len(scheduled),
+            "scheduled_tweets": [
+                {
+                    "content": st.content,
+                    "scheduled_time": st.scheduled_time.isoformat(),
+                    "predicted_score": st.predicted_score,
+                    "category": st.category
+                }
+                for st in scheduled
+            ]
+        }
+
+    except Exception as e:
+        logger.error(f"Error auto-scheduling: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/queue/status")
+async def get_queue_status():
+    """Get current tweet queue status."""
+    try:
+        queue = SmartPostingQueue()
+        status = queue.get_queue_status()
+        queue.close()
+
+        return status
+
+    except Exception as e:
+        logger.error(f"Error getting queue status: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/queue/optimize")
+async def optimize_queue():
+    """Optimize existing tweet queue."""
+    try:
+        queue = SmartPostingQueue()
+        report = queue.optimize_queue()
+        queue.close()
+
+        return {
+            "success": True,
+            "optimization_report": report
+        }
+
+    except Exception as e:
+        logger.error(f"Error optimizing queue: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/competitor/analyze")
+async def analyze_competitor(username: str, depth: str = "standard"):
+    """Analyze a competitor account."""
+    try:
+        from integrations.twitter.client import TwitterClient
+
+        # Initialize Twitter client
+        api_keys = config.api_keys
+        twitter_client = TwitterClient(
+            api_key=api_keys.twitter_api_key,
+            api_secret=api_keys.twitter_api_secret,
+            access_token=api_keys.twitter_access_token,
+            access_secret=api_keys.twitter_access_secret,
+            bearer_token=api_keys.twitter_bearer_token
+        ) if api_keys.twitter_api_key else None
+
+        if not twitter_client:
+            raise HTTPException(status_code=400, detail="Twitter API not configured")
+
+        intel = CompetitorIntelligence(
+            twitter_client=twitter_client,
+            claude_client=claude_client
+        )
+
+        report = await intel.analyze_competitor_strategy(username, depth=depth)
+        intel.close()
+
+        return {
+            "success": True,
+            "analysis": report
+        }
+
+    except Exception as e:
+        logger.error(f"Error analyzing competitor: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/competitor/gap-analysis")
+async def content_gap_analysis(competitors: List[str]):
+    """Identify content gaps across competitors."""
+    try:
+        from integrations.twitter.client import TwitterClient
+
+        api_keys = config.api_keys
+        twitter_client = TwitterClient(
+            api_key=api_keys.twitter_api_key,
+            api_secret=api_keys.twitter_api_secret,
+            access_token=api_keys.twitter_access_token,
+            access_secret=api_keys.twitter_access_secret
+        ) if api_keys.twitter_api_key else None
+
+        if not twitter_client:
+            raise HTTPException(status_code=400, detail="Twitter API not configured")
+
+        intel = CompetitorIntelligence(
+            twitter_client=twitter_client,
+            claude_client=claude_client
+        )
+
+        gaps = await intel.gap_analysis(competitors)
+        intel.close()
+
+        return {
+            "success": True,
+            "gaps": gaps
+        }
+
+    except Exception as e:
+        logger.error(f"Error in gap analysis: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/visual/generate-quote-card")
+async def generate_quote_card(
+    text: str,
+    author: str = "",
+    style: str = "minimal"
+):
+    """Generate a quote card image."""
+    try:
+        generator = VisualContentGenerator()
+        image_path = generator.generate_quote_card(text, author, style)
+
+        return {
+            "success": True,
+            "image_path": image_path,
+            "timestamp": datetime.now().isoformat()
+        }
+
+    except Exception as e:
+        logger.error(f"Error generating quote card: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/visual/generate-stats-card")
+async def generate_stats_card(stats: Dict[str, Any], title: str = "Stats"):
+    """Generate a stats visualization card."""
+    try:
+        generator = VisualContentGenerator()
+        image_path = generator.generate_stats_card(stats, title)
+
+        return {
+            "success": True,
+            "image_path": image_path
+        }
+
+    except Exception as e:
+        logger.error(f"Error generating stats card: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/notifications/test")
+async def test_notification(title: str, message: str):
+    """Send a test notification."""
+    try:
+        notifier = get_notification_service()
+        success = notifier.send_mac_notification(title, message, sound=True)
+
+        return {
+            "success": success,
+            "message": "Notification sent" if success else "Notification failed"
+        }
+
+    except Exception as e:
+        logger.error(f"Error sending notification: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/database/stats")
+async def get_database_stats():
+    """Get database statistics."""
+    try:
+        session = get_db_session()
+
+        total_tweets = session.query(Tweet).count()
+        total_drafts = session.query(TweetDraft).count()
+        pending_drafts = session.query(TweetDraft).filter(
+            TweetDraft.posted == False
+        ).count()
+
+        session.close()
+
+        return {
+            "total_tweets": total_tweets,
+            "total_drafts": total_drafts,
+            "pending_drafts": pending_drafts,
+            "vector_store_documents": vector_store.count() if vector_store else 0
+        }
+
+    except Exception as e:
+        logger.error(f"Error getting database stats: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":

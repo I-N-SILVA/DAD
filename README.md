@@ -2,8 +2,9 @@
 
 An intelligent, automated content creation system for X (Twitter) powered by RAG (Retrieval-Augmented Generation), browser automation, and AI.
 
-## Features
+## ✨ Features
 
+### Core Capabilities
 - **RAG-Powered Content Generation**: Leverages your past tweets, writing samples, and curated content to generate on-brand tweets
 - **Intelligent Scraping**: Monitors trending topics, competitor accounts, and news sources
 - **Browser Automation**: Automatically researches content, extracts insights, and manages web tasks
@@ -11,6 +12,18 @@ An intelligent, automated content creation system for X (Twitter) powered by RAG
 - **X/Twitter Integration**: Direct posting, engagement tracking, and social listening
 - **Privacy-First**: All data stored locally with secure API key management
 - **Web Dashboard**: Review, approve, and manage all automated content
+
+### 🚀 NEW Advanced Features
+- **📊 Performance Analytics**: AI-powered insights into what content works best
+- **🎯 Tweet Scoring**: Predict engagement before posting (0-100 score with recommendations)
+- **🤖 Smart Queue with ML**: Auto-schedule tweets at optimal times based on your history
+- **🕵️ Competitor Intelligence**: Deep analysis of competitor accounts + content gap identification
+- **💬 Engagement Automation**: AI-powered replies and relationship building (with safety filters)
+- **🎨 Visual Content Generation**: Auto-generate quote cards, stats visuals, and thread previews
+- **🔔 Smart Notifications**: Mac notifications + email reports for trends, engagement, and performance
+- **📈 Comprehensive Tracking**: SQLite database tracking all tweets, analytics, and interactions
+
+**👉 See [NEW_FEATURES.md](NEW_FEATURES.md) for detailed documentation of all advanced features!**
 
 ## Architecture
 
