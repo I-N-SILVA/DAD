@@ -1,0 +1,91 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+venv/
+env/
+ENV/
+
+# Configuration (contains API keys)
+config/config.yaml
+.env
+.env.local
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+data/databases/*.db
+data/databases/backups/
+
+# Logs
+data/logs/
+*.log
+
+# Vector Store
+data/vectorstore/
+data/knowledge_base/.index/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Cache
+.cache/
+*.cache
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Browser automation
+playwright/.cache/
+screenshots/
+downloads/
+
+# Backups
+*.backup
+*.bak
+
+# Mac
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Temporary files
+tmp/
+temp/
+*.tmp

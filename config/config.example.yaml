@@ -1,0 +1,201 @@
+# X Content RAG System Configuration
+
+# API Keys (NEVER commit the actual config.yaml with real keys!)
+api_keys:
+  anthropic_api_key: "sk-ant-..."  # Your Claude API key
+  twitter_api_key: "your_twitter_api_key"
+  twitter_api_secret: "your_twitter_api_secret"
+  twitter_access_token: "your_access_token"
+  twitter_access_secret: "your_access_secret"
+  twitter_bearer_token: "your_bearer_token"
+
+# RAG Configuration
+rag:
+  embedding_model: "sentence-transformers/all-MiniLM-L6-v2"
+  chunk_size: 512
+  chunk_overlap: 50
+  top_k_results: 5
+  similarity_threshold: 0.7
+  vectorstore_path: "./data/vectorstore/chroma"
+
+# Claude Configuration
+claude:
+  model: "claude-sonnet-4-5-20250929"
+  max_tokens: 1024
+  temperature: 0.7
+  system_prompt: |
+    You are an expert content creator who helps generate engaging X (Twitter) content.
+    Match the user's writing style, tone, and preferences while creating compelling tweets.
+
+# Content Preferences
+content:
+  niches:
+    - "artificial intelligence"
+    - "machine learning"
+    - "tech trends"
+    - "startups"
+    - "productivity"
+
+  target_audience: "tech professionals, founders, AI enthusiasts"
+
+  tweet_characteristics:
+    max_length: 280
+    preferred_length: 150-200
+    use_emojis: false
+    use_hashtags: true
+    max_hashtags: 2
+    include_questions: true
+    include_stats: true
+
+  writing_style:
+    tone: "professional yet conversational"
+    voice: "authoritative but approachable"
+    avoid: ["excessive jargon", "marketing speak", "clickbait"]
+
+# Automation & Scheduling
+scheduling:
+  enabled: true
+  timezone: "America/Los_Angeles"
+
+  jobs:
+    morning_briefing:
+      enabled: true
+      cron: "0 8 * * *"  # 8 AM daily
+      description: "Scrape news and generate morning content briefing"
+
+    trending_check:
+      enabled: true
+      cron: "0 */2 * * *"  # Every 2 hours
+      description: "Check trending topics on X"
+
+    tweet_generation:
+      enabled: true
+      cron: "0 10,16 * * *"  # 10 AM and 4 PM
+      description: "Generate tweet ideas twice daily"
+
+    competitor_monitoring:
+      enabled: true
+      cron: "0 12 * * *"  # Noon daily
+      description: "Monitor competitor accounts"
+
+    weekly_report:
+      enabled: true
+      cron: "0 9 * * 1"  # 9 AM every Monday
+      description: "Generate weekly performance report"
+
+    knowledge_base_backup:
+      enabled: true
+      cron: "0 2 * * *"  # 2 AM daily
+      description: "Backup knowledge base and databases"
+
+# Browser Automation
+browser:
+  headless: true
+  browser_type: "chromium"  # chromium, firefox, webkit
+  timeout: 30000  # milliseconds
+  viewport:
+    width: 1920
+    height: 1080
+  user_agent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+
+  scraping_targets:
+    news_sites:
+      - url: "https://news.ycombinator.com"
+        selector: ".titleline > a"
+        frequency: "daily"
+      - url: "https://techcrunch.com"
+        selector: ".post-block__title__link"
+        frequency: "daily"
+
+    competitor_accounts:
+      - username: "competitor1"
+        monitor_frequency: "daily"
+      - username: "competitor2"
+        monitor_frequency: "daily"
+
+# X/Twitter Settings
+twitter:
+  auto_post: false  # Require manual approval
+  optimal_posting_times:  # Based on your engagement history
+    - "09:00"
+    - "12:00"
+    - "17:00"
+
+  engagement_tracking:
+    enabled: true
+    metrics: ["likes", "retweets", "replies", "impressions"]
+
+  monitoring:
+    keywords:
+      - "artificial intelligence"
+      - "machine learning"
+      - "AI tools"
+
+    accounts_to_monitor:
+      - "username1"
+      - "username2"
+
+# Database Configuration
+database:
+  sqlite_path: "./data/databases/xcontentrag.db"
+  backup_path: "./data/databases/backups"
+  max_backup_count: 7  # Keep last 7 backups
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  log_path: "./data/logs"
+  max_file_size: "10MB"
+  backup_count: 5
+  format: "{time:YYYY-MM-DD HH:mm:ss} | {level} | {module}:{function}:{line} | {message}"
+
+# FastAPI Server
+server:
+  host: "0.0.0.0"
+  port: 8000
+  reload: false
+  workers: 4
+
+# Dashboard
+dashboard:
+  port: 8501
+  title: "X Content RAG System"
+  theme: "light"  # light or dark
+
+# Workflows Configuration
+workflows:
+  morning_briefing:
+    news_sources: 5
+    trending_topics: 10
+    tweet_ideas: 5
+
+  research_agent:
+    max_urls_per_run: 10
+    summary_length: 300
+    extract_quotes: true
+
+  competitor_intelligence:
+    accounts_count: 10
+    lookback_days: 7
+    content_gap_analysis: true
+
+# Performance & Limits
+limits:
+  max_tweets_per_day: 10
+  max_scraping_requests_per_hour: 100
+  max_rag_documents: 10000
+  rate_limit_per_minute: 60
+
+# Security
+security:
+  enable_api_key_auth: false  # Set to true for production
+  allowed_origins:
+    - "http://localhost:3000"
+    - "http://localhost:8501"
+
+# Mac-Specific Settings
+mac:
+  enable_notifications: true
+  notification_sound: true
+  run_as_service: false
+  service_name: "com.xcontentrag"
